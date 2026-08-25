@@ -220,7 +220,29 @@ data class PlayerPlaybackSnapshot(
     val playbackSpeed: Float = 1f,
     val videoWidth: Int = 0,
     val videoHeight: Int = 0,
+    val videoTransfer: String = "",
+    val videoColorMatrix: String = "",
+    val dolbyVisionProfile: Int = 0,
+    val hasHdr10PlusMetadata: Boolean = false,
 )
+
+internal fun hdrPlaybackBadgeLabel(
+    videoTransfer: String?,
+    videoColorMatrix: String? = null,
+    dolbyVisionProfile: Int = 0,
+    hasHdr10PlusMetadata: Boolean = false,
+): String? {
+    val normalized = videoTransfer?.trim()?.lowercase().orEmpty()
+    val normalizedMatrix = videoColorMatrix?.trim()?.lowercase().orEmpty()
+    if (dolbyVisionProfile > 0 || "dolbyvision" in normalizedMatrix || "dolby vision" in normalizedMatrix) {
+        return "Dolby Vision"
+    }
+    if (hasHdr10PlusMetadata) return "HDR10+"
+    if (normalized == "hlg" || "arib-std-b67" in normalized) return "HLG"
+    if (normalized == "pq") return "HDR10"
+    if ("2084" in normalized) return "HDR"
+    return null
+}
 
 data class PlayerNowPlayingInfo(
     val title: String,

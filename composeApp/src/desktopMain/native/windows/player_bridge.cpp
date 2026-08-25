@@ -1096,6 +1096,24 @@ public:
         return flagProperty("eof-reached", false);
     }
 
+    std::string videoTransfer() {
+        return stringProperty("video-params/gamma", "");
+    }
+
+    std::string videoColorMatrix() {
+        return stringProperty("video-params/colormatrix", "");
+    }
+
+    int dolbyVisionProfile() {
+        return (int)int64Property("current-tracks/video/dolby-vision-profile", 0);
+    }
+
+    bool hasHdr10PlusMetadata() {
+        return doubleProperty("video-params/scene-max-r", 0.0) > 0.0 ||
+            doubleProperty("video-params/scene-max-g", 0.0) > 0.0 ||
+            doubleProperty("video-params/scene-max-b", 0.0) > 0.0;
+    }
+
     std::string audioTracksJson() {
         return tracksJsonForType("audio");
     }
@@ -2387,6 +2405,30 @@ extern "C" JNIEXPORT jfloat JNICALL
 Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_speed(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? (jfloat)player->speed() : 1.0f;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_videoTransfer(JNIEnv *env, jobject, jlong handle) {
+    auto player = playerFromHandle(handle);
+    return newJavaStringUtf8(env, player ? player->videoTransfer() : "");
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_videoColorMatrix(JNIEnv *env, jobject, jlong handle) {
+    auto player = playerFromHandle(handle);
+    return newJavaStringUtf8(env, player ? player->videoColorMatrix() : "");
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_dolbyVisionProfile(JNIEnv *, jobject, jlong handle) {
+    auto player = playerFromHandle(handle);
+    return player ? (jint)player->dolbyVisionProfile() : 0;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_hasHdr10PlusMetadata(JNIEnv *, jobject, jlong handle) {
+    auto player = playerFromHandle(handle);
+    return player && player->hasHdr10PlusMetadata() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jfloat JNICALL

@@ -1801,6 +1801,30 @@ JNIEXPORT jfloat JNICALL NP(speed)(JNIEnv *, jobject, jlong handle) {
     return static_cast<jfloat>(mpvGetDouble(p->mpv, "speed"));
 }
 
+JNIEXPORT jstring JNICALL NP(videoTransfer)(JNIEnv *env, jobject, jlong handle) {
+    Player *p = asPlayer(handle);
+    return utf8ToJstring(env, p ? mpvGetStr(p->mpv, "video-params/gamma") : "");
+}
+
+JNIEXPORT jstring JNICALL NP(videoColorMatrix)(JNIEnv *env, jobject, jlong handle) {
+    Player *p = asPlayer(handle);
+    return utf8ToJstring(env, p ? mpvGetStr(p->mpv, "video-params/colormatrix") : "");
+}
+
+JNIEXPORT jint JNICALL NP(dolbyVisionProfile)(JNIEnv *, jobject, jlong handle) {
+    Player *p = asPlayer(handle);
+    return p ? static_cast<jint>(mpvGetInt(p->mpv, "current-tracks/video/dolby-vision-profile")) : 0;
+}
+
+JNIEXPORT jboolean JNICALL NP(hasHdr10PlusMetadata)(JNIEnv *, jobject, jlong handle) {
+    Player *p = asPlayer(handle);
+    if (!p) return JNI_FALSE;
+    bool present = mpvGetDouble(p->mpv, "video-params/scene-max-r") > 0.0 ||
+        mpvGetDouble(p->mpv, "video-params/scene-max-g") > 0.0 ||
+        mpvGetDouble(p->mpv, "video-params/scene-max-b") > 0.0;
+    return present ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT void JNICALL NP(setResizeMode)(JNIEnv *, jobject, jlong handle, jint mode) {
     Player *p = asPlayer(handle);
     if (!p) return;

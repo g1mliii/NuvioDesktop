@@ -95,6 +95,7 @@ internal class NativePlayerController(
     private var pendingSubtitleDelayMs: Int? = null
     private var pendingSubtitleStyle: SubtitleStyleState? = null
     private var pendingUseLibass: Boolean = false
+    private var detectedHdr10PlusMetadata: Boolean = false
     private var lastSentControlsStructureKey: NativeControlsStructureKey? = null
     private var onAction: (PlayerControlsAction) -> Boolean = { false }
     private var onEvent: (String, Double) -> Boolean = { _, _ -> false }
@@ -302,6 +303,7 @@ internal class NativePlayerController(
                     val accepted = synchronized(lifecycleLock) {
                         if (!releaseRequested && terminalReleaseFailure == null && pendingSource === pending) {
                             handle = created
+                            detectedHdr10PlusMetadata = false
                             true
                         } else {
                             false
@@ -598,6 +600,9 @@ internal class NativePlayerController(
         return runCatching {
             val isLoading = NativePlayerBridge.isLoading(current)
             val isEnded = NativePlayerBridge.isEnded(current)
+            if (NativePlayerBridge.hasHdr10PlusMetadata(current)) {
+                detectedHdr10PlusMetadata = true
+            }
             PlayerPlaybackSnapshot(
                 isLoading = isLoading,
                 isPlaying = !NativePlayerBridge.isPaused(current) && !isLoading && !isEnded,
@@ -606,6 +611,10 @@ internal class NativePlayerController(
                 positionMs = NativePlayerBridge.positionMs(current),
                 bufferedPositionMs = NativePlayerBridge.bufferedPositionMs(current),
                 playbackSpeed = NativePlayerBridge.speed(current),
+                videoTransfer = NativePlayerBridge.videoTransfer(current),
+                videoColorMatrix = NativePlayerBridge.videoColorMatrix(current),
+                dolbyVisionProfile = NativePlayerBridge.dolbyVisionProfile(current),
+                hasHdr10PlusMetadata = detectedHdr10PlusMetadata,
             )
         }.getOrDefault(PlayerPlaybackSnapshot(isLoading = true))
     }
@@ -1164,6 +1173,8 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         append(',')
         appendJsonField("playbackSpeedLabel", playbackSpeedLabel)
         append(',')
+        appendJsonField("hdrBadgeLabel", hdrBadgeLabel)
+        append(',')
         appendJsonField("isFullscreen", isFullscreen)
         append(',')
         appendJsonField("volumeLevel", volumeLevel)
@@ -1393,6 +1404,8 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         appendJsonField("showEpisodes", showEpisodes)
         append(',')
         appendJsonField("showExternalPlayer", showExternalPlayer)
+        append(',')
+        appendJsonField("showHdrBadge", showHdrBadge)
         append(',')
         appendJsonField("durationMs", durationMs)
         append(',')

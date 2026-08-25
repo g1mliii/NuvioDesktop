@@ -64,6 +64,10 @@ internal object NativePlayerBridge {
     external fun isEnded(handle: Long): Boolean
     external fun isPaused(handle: Long): Boolean
     external fun speed(handle: Long): Float
+    external fun videoTransfer(handle: Long): String
+    external fun videoColorMatrix(handle: Long): String
+    external fun dolbyVisionProfile(handle: Long): Int
+    external fun hasHdr10PlusMetadata(handle: Long): Boolean
     external fun audioTracksJson(handle: Long): String
     external fun subtitleTracksJson(handle: Long): String
     external fun selectAudioTrack(handle: Long, trackId: Int)

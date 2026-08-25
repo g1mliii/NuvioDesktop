@@ -100,6 +100,10 @@
 - (void)seekByMilliseconds:(long long)offsetMs;
 - (void)setSpeed:(double)speed;
 - (double)speed;
+- (NSString *)videoTransfer;
+- (NSString *)videoColorMatrix;
+- (int)dolbyVisionProfile;
+- (BOOL)hasHdr10PlusMetadata;
 - (void)setVolume:(double)level;
 - (double)volume;
 - (void)setResizeMode:(int)mode;
@@ -1836,6 +1840,24 @@ static void setMpvOptionString(mpv_handle *mpv, const char *name, const char *va
     return _cachedSpeed.load();
 }
 
+- (NSString *)videoTransfer {
+    return [self stringProperty:"video-params/gamma" fallback:@""];
+}
+
+- (NSString *)videoColorMatrix {
+    return [self stringProperty:"video-params/colormatrix" fallback:@""];
+}
+
+- (int)dolbyVisionProfile {
+    return (int)[self int64Property:"current-tracks/video/dolby-vision-profile" fallback:0];
+}
+
+- (BOOL)hasHdr10PlusMetadata {
+    return [self doubleProperty:"video-params/scene-max-r" fallback:0.0] > 0.0 ||
+        [self doubleProperty:"video-params/scene-max-g" fallback:0.0] > 0.0 ||
+        [self doubleProperty:"video-params/scene-max-b" fallback:0.0] > 0.0;
+}
+
 - (double)rawSpeed {
     return [self doubleProperty:"speed" fallback:_cachedSpeed.load()];
 }
@@ -2803,6 +2825,52 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_speed(
     if (handle == 0) return 1.0f;
     MpvWebPlayer *player = (__bridge MpvWebPlayer *)(void *)(intptr_t)handle;
     return (jfloat)[player speed];
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_videoTransfer(
+    JNIEnv *env,
+    jobject /* bridge */,
+    jlong handle
+) {
+    if (handle == 0) return env->NewStringUTF("");
+    MpvWebPlayer *player = (__bridge MpvWebPlayer *)(void *)(intptr_t)handle;
+    NSString *value = [player videoTransfer] ?: @"";
+    return env->NewStringUTF(value.UTF8String ?: "");
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_videoColorMatrix(
+    JNIEnv *env,
+    jobject /* bridge */,
+    jlong handle
+) {
+    if (handle == 0) return env->NewStringUTF("");
+    MpvWebPlayer *player = (__bridge MpvWebPlayer *)(void *)(intptr_t)handle;
+    NSString *value = [player videoColorMatrix] ?: @"";
+    return env->NewStringUTF(value.UTF8String ?: "");
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_dolbyVisionProfile(
+    JNIEnv * /* env */,
+    jobject /* bridge */,
+    jlong handle
+) {
+    if (handle == 0) return 0;
+    MpvWebPlayer *player = (__bridge MpvWebPlayer *)(void *)(intptr_t)handle;
+    return (jint)[player dolbyVisionProfile];
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_hasHdr10PlusMetadata(
+    JNIEnv * /* env */,
+    jobject /* bridge */,
+    jlong handle
+) {
+    if (handle == 0) return JNI_FALSE;
+    MpvWebPlayer *player = (__bridge MpvWebPlayer *)(void *)(intptr_t)handle;
+    return [player hasHdr10PlusMetadata] ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jfloat JNICALL

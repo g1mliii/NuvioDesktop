@@ -237,6 +237,12 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
             )
         else -> ""
     }
+    val hdrBadgeLabel = hdrPlaybackBadgeLabel(
+        videoTransfer = playbackSnapshot.videoTransfer,
+        videoColorMatrix = playbackSnapshot.videoColorMatrix,
+        dolbyVisionProfile = playbackSnapshot.dolbyVisionProfile,
+        hasHdr10PlusMetadata = playbackSnapshot.hasHdr10PlusMetadata,
+    )
     val playerControlsState = PlayerControlsState(
         title = title,
         episodeText = episodeText,
@@ -253,6 +259,7 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         pauseOverlayDescription = (activePauseDescription ?: activeStreamSubtitle).orEmpty(),
         resizeModeLabel = stringResource(resizeMode.labelRes),
         playbackSpeedLabel = formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed),
+        hdrBadgeLabel = hdrBadgeLabel.orEmpty(),
         subtitlesLabel = stringResource(Res.string.compose_player_subs),
         audioLabel = stringResource(Res.string.compose_player_audio),
         sourcesLabel = stringResource(Res.string.compose_player_sources),
@@ -356,6 +363,7 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         showSources = activeVideoId != null,
         showEpisodes = isSeries,
         showExternalPlayer = args.onOpenInExternalPlayer != null,
+        showHdrBadge = hdrBadgeLabel != null,
         durationMs = playbackSnapshot.durationMs,
         positionMs = displayedPositionMs,
         sourceIsLoading = sourceStreamsState.isAnyLoading,

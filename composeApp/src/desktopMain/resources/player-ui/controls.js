@@ -28,6 +28,7 @@ const nextEpisodeButtonLabel = document.getElementById("nextEpisodeButtonLabel")
 const fullscreenButton = document.getElementById("fullscreenButton");
 const fullscreenIcon = document.getElementById("fullscreenIcon");
 const title = document.getElementById("title");
+const hdrBadge = document.getElementById("hdrBadge");
 const episode = document.getElementById("episode");
 const playbackMetadata = document.querySelector(".metadata");
 const streamTitle = document.getElementById("streamTitle");
@@ -174,6 +175,7 @@ let state = {
   pauseOverlayDescription: "",
   resizeModeLabel: "Fit",
   playbackSpeedLabel: "1x",
+  hdrBadgeLabel: "HDR",
   isFullscreen: false,
   volumeLevel: null,
   subtitlesLabel: "Subs",
@@ -289,6 +291,7 @@ let state = {
   showSources: false,
   showEpisodes: false,
   showExternalPlayer: false,
+  showHdrBadge: false,
   durationMs: 0,
   positionMs: 0,
   audioTracks: [],
@@ -2129,6 +2132,8 @@ const renderChrome = () => {
   syncParentalGuide(showOpening || showError);
 
   title.textContent = state.title || "";
+  hdrBadge.textContent = state.hdrBadgeLabel || "HDR";
+  setVisible(hdrBadge, Boolean(state.showHdrBadge && state.hdrBadgeLabel));
   setText(episode, state.episodeText);
   setText(streamTitle, state.streamTitle);
   setText(providerName, state.providerName);

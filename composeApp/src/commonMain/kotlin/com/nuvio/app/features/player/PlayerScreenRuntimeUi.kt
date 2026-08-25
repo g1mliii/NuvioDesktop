@@ -253,6 +253,8 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         pauseOverlayDescription = (activePauseDescription ?: activeStreamSubtitle).orEmpty(),
         resizeModeLabel = stringResource(resizeMode.labelRes),
         playbackSpeedLabel = formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed),
+        downloadLabel = stringResource(Res.string.streams_download_file),
+        copyStreamLinkLabel = stringResource(Res.string.streams_copy_link),
         subtitlesLabel = stringResource(Res.string.compose_player_subs),
         audioLabel = stringResource(Res.string.compose_player_audio),
         sourcesLabel = stringResource(Res.string.compose_player_sources),
@@ -356,6 +358,8 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         showSources = activeVideoId != null,
         showEpisodes = isSeries,
         showExternalPlayer = args.onOpenInExternalPlayer != null,
+        showDownload = canDownloadActiveStream(),
+        showCopyStreamLink = activeShareableStreamUrl() != null,
         durationMs = playbackSnapshot.durationMs,
         positionMs = displayedPositionMs,
         sourceIsLoading = sourceStreamsState.isAnyLoading,
@@ -779,6 +783,8 @@ private fun PlayerScreenRuntime.handlePlayerControlsAction(action: PlayerControl
         }
         PlayerControlsAction.ResizeMode -> cycleResizeMode()
         PlayerControlsAction.Speed -> cyclePlaybackSpeed()
+        PlayerControlsAction.Download -> downloadActiveStream()
+        PlayerControlsAction.CopyStreamLink -> copyActiveStreamLink()
         PlayerControlsAction.Subtitles -> {
             refreshTracks()
             showSubtitleModal = true

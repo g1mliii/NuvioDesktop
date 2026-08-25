@@ -1,5 +1,6 @@
 package com.nuvio.app.features.player
 
+import com.nuvio.app.core.build.AppFeaturePolicy
 import com.nuvio.app.core.ui.NuvioToastController
 import com.nuvio.app.features.debrid.DirectDebridPlayableResult
 import com.nuvio.app.features.debrid.DirectDebridPlaybackResolver
@@ -10,11 +11,74 @@ import com.nuvio.app.features.downloads.DownloadItem
 import com.nuvio.app.features.downloads.DownloadsRepository
 import com.nuvio.app.features.p2p.P2pSettingsRepository
 import com.nuvio.app.features.p2p.P2pStreamingEngine
+import com.nuvio.app.features.streams.StreamBehaviorHints
 import com.nuvio.app.features.streams.StreamItem
 import com.nuvio.app.features.streams.StreamLinkCacheRepository
+import com.nuvio.app.features.streams.StreamProxyHeaders
 import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import com.nuvio.app.features.watchprogress.buildPlaybackVideoId
 import kotlinx.coroutines.launch
+
+internal fun String.isSupportedPlayerDownloadUrl(): Boolean {
+    val normalized = trim().lowercase()
+    if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) return false
+    return !normalized.endsWith(".m3u8") &&
+        !normalized.contains(".m3u8?") &&
+        !normalized.endsWith(".mpd") &&
+        !normalized.contains(".mpd?") &&
+        !normalized.endsWith(".torrent") &&
+        !normalized.contains(".torrent?")
+}
+
+internal fun PlayerScreenRuntime.activeShareableStreamUrl(): String? =
+    activeSourceUrl
+        .trim()
+        .takeIf { activeTorrentInfoHash == null }
+        ?.takeIf { it.startsWith("http://", ignoreCase = true) || it.startsWith("https://", ignoreCase = true) }
+
+internal fun PlayerScreenRuntime.copyActiveStreamLink() {
+    val url = activeShareableStreamUrl() ?: return
+    copyToClipboard(url)
+    NuvioToastController.show(streamLinkCopiedLabel)
+}
+
+internal fun PlayerScreenRuntime.downloadActiveStream() {
+    val url = activeShareableStreamUrl()?.takeIf { it.isSupportedPlayerDownloadUrl() } ?: return
+    val stream = StreamItem(
+        name = activeStreamTitle,
+        description = activeStreamSubtitle,
+        url = url,
+        addonName = activeProviderName,
+        addonId = activeProviderAddonId.orEmpty(),
+        streamType = activeStreamType,
+        behaviorHints = StreamBehaviorHints(
+            proxyHeaders = StreamProxyHeaders(
+                request = activeSourceHeaders,
+                response = activeSourceResponseHeaders,
+            ),
+        ),
+    )
+    val result = DownloadsRepository.enqueueFromStream(
+        contentType = contentType ?: parentMetaType,
+        videoId = activeVideoId ?: parentMetaId,
+        parentMetaId = parentMetaId,
+        parentMetaType = parentMetaType,
+        title = title,
+        logo = logo,
+        poster = poster,
+        background = background,
+        seasonNumber = activeSeasonNumber,
+        episodeNumber = activeEpisodeNumber,
+        episodeTitle = activeEpisodeTitle,
+        episodeThumbnail = activeEpisodeThumbnail,
+        stream = stream,
+    )
+    NuvioToastController.show(result.toastMessage())
+}
+
+internal fun PlayerScreenRuntime.canDownloadActiveStream(): Boolean =
+    AppFeaturePolicy.downloadsEnabled &&
+        activeShareableStreamUrl()?.isSupportedPlayerDownloadUrl() == true
 
 internal fun PlayerScreenRuntime.resolveDebridForPlayer(
     stream: StreamItem,

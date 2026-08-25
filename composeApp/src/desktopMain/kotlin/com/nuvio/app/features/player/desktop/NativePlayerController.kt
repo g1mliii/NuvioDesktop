@@ -1124,6 +1124,8 @@ private fun String.toPlayerControlsAction(): PlayerControlsAction? =
         "keyboardVolumeUp" -> PlayerControlsAction.KeyboardVolumeUp
         "resize" -> PlayerControlsAction.ResizeMode
         "speed" -> PlayerControlsAction.Speed
+        "download" -> PlayerControlsAction.Download
+        "copyStreamLink" -> PlayerControlsAction.CopyStreamLink
         "subtitles" -> PlayerControlsAction.Subtitles
         "audio" -> PlayerControlsAction.Audio
         "sources" -> PlayerControlsAction.Sources
@@ -1163,6 +1165,10 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         appendJsonField("resizeModeLabel", resizeModeLabel)
         append(',')
         appendJsonField("playbackSpeedLabel", playbackSpeedLabel)
+        append(',')
+        appendJsonField("downloadLabel", downloadLabel)
+        append(',')
+        appendJsonField("copyStreamLinkLabel", copyStreamLinkLabel)
         append(',')
         appendJsonField("isFullscreen", isFullscreen)
         append(',')
@@ -1393,6 +1399,10 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         appendJsonField("showEpisodes", showEpisodes)
         append(',')
         appendJsonField("showExternalPlayer", showExternalPlayer)
+        append(',')
+        appendJsonField("showDownload", showDownload)
+        append(',')
+        appendJsonField("showCopyStreamLink", showCopyStreamLink)
         append(',')
         appendJsonField("durationMs", durationMs)
         append(',')

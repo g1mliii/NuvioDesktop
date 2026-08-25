@@ -14,8 +14,10 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.app.features.addons.AddonRepository
@@ -42,6 +44,7 @@ import nuvio.composeapp.generated.resources.parental_severity_moderate
 import nuvio.composeapp.generated.resources.parental_severity_severe
 import nuvio.composeapp.generated.resources.parental_violence
 import nuvio.composeapp.generated.resources.compose_player_tba
+import nuvio.composeapp.generated.resources.streams_link_copied
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -100,6 +103,7 @@ internal fun PlayerScreenContent(args: PlayerScreenArgs) {
             },
     ) {
         val density = LocalDensity.current
+        val clipboardManager = LocalClipboardManager.current
         val horizontalSafePadding = playerHorizontalSafePadding()
         val metrics = remember(maxWidth) { PlayerLayoutMetrics.fromWidth(maxWidth) }
 
@@ -130,6 +134,8 @@ internal fun PlayerScreenContent(args: PlayerScreenArgs) {
         runtime.resizeModeZoomLabel = stringResource(Res.string.compose_player_resize_zoom)
         runtime.resizeModeStretchLabel = stringResource(Res.string.compose_player_resize_stretch)
         runtime.downloadedLabel = stringResource(Res.string.compose_player_downloaded)
+        runtime.streamLinkCopiedLabel = stringResource(Res.string.streams_link_copied)
+        runtime.copyToClipboard = { value -> clipboardManager.setText(AnnotatedString(value)) }
         runtime.airsPrefix = stringResource(Res.string.compose_player_airs_prefix)
         runtime.tbaLabel = stringResource(Res.string.compose_player_tba)
         runtime.genericUnknownLabel = stringResource(Res.string.generic_unknown)

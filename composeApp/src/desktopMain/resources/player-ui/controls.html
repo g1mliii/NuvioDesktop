@@ -79,6 +79,12 @@
     <symbol id="icon-open" viewBox="0 0 24 24">
       <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/>
     </symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24">
+      <path d="M19 9h-4V3H9v6H5l7 7 7-7ZM5 18v2h14v-2H5Z"/>
+    </symbol>
+    <symbol id="icon-copy" viewBox="0 0 24 24">
+      <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z"/>
+    </symbol>
     <symbol id="icon-check" viewBox="0 0 24 24">
       <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/>
     </symbol>
@@ -118,6 +124,8 @@
     <div class="content">
       <header class="header">
         <nav class="header-actions" aria-label="Player actions">
+          <button class="header-button" id="downloadButton" data-command="download" aria-label="Download file" hidden><svg><use href="#icon-download"></use></svg></button>
+          <button class="header-button" id="copyStreamLinkButton" data-command="copyStreamLink" aria-label="Copy stream link" hidden><svg><use href="#icon-copy"></use></svg></button>
           <button class="header-button" id="submitIntroButton" data-command="submitIntro" aria-label="Submit intro"><svg><use href="#icon-flag"></use></svg></button>
           <button class="header-button" id="videoSettingsButton" data-command="videoSettings" aria-label="Video settings"><svg><use href="#icon-build"></use></svg></button>
           <button class="header-button" id="fullscreenButton" data-command="toggleFullscreen" aria-label="Enter fullscreen"><svg><use id="fullscreenIcon" href="#icon-fullscreen"></use></svg></button>

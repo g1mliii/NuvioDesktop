@@ -40,6 +40,8 @@ const sourcesLabel = document.getElementById("sourcesLabel");
 const episodesLabel = document.getElementById("episodesLabel");
 const submitIntroButton = document.getElementById("submitIntroButton");
 const videoSettingsButton = document.getElementById("videoSettingsButton");
+const downloadButton = document.getElementById("downloadButton");
+const copyStreamLinkButton = document.getElementById("copyStreamLinkButton");
 const backButton = document.getElementById("backButton");
 const openingOverlay = document.getElementById("openingOverlay");
 const openingArtwork = document.getElementById("openingArtwork");
@@ -174,6 +176,8 @@ let state = {
   pauseOverlayDescription: "",
   resizeModeLabel: "Fit",
   playbackSpeedLabel: "1x",
+  downloadLabel: "Download file",
+  copyStreamLinkLabel: "Copy stream link",
   isFullscreen: false,
   volumeLevel: null,
   subtitlesLabel: "Subs",
@@ -289,6 +293,8 @@ let state = {
   showSources: false,
   showEpisodes: false,
   showExternalPlayer: false,
+  showDownload: false,
+  showCopyStreamLink: false,
   durationMs: 0,
   positionMs: 0,
   audioTracks: [],
@@ -2150,6 +2156,8 @@ const renderChrome = () => {
 
   setVisible(submitIntroButton, Boolean(state.showSubmitIntro));
   setVisible(videoSettingsButton, Boolean(state.showVideoSettings));
+  setVisible(downloadButton, Boolean(state.showDownload));
+  setVisible(copyStreamLinkButton, Boolean(state.showCopyStreamLink));
   setVisible(sourcesButton, Boolean(state.showSources));
   setVisible(episodesButton, Boolean(state.showEpisodes));
   syncActionFocusState();
@@ -2175,6 +2183,10 @@ const renderChrome = () => {
   backButton.setAttribute("aria-label", state.closeLabel || "Close player");
   submitIntroButton.setAttribute("aria-label", state.submitIntroLabel || "Submit Intro");
   videoSettingsButton.setAttribute("aria-label", state.videoSettingsLabel || "Video settings");
+  downloadButton.setAttribute("aria-label", state.downloadLabel || "Download file");
+  downloadButton.setAttribute("title", state.downloadLabel || "Download file");
+  copyStreamLinkButton.setAttribute("aria-label", state.copyStreamLinkLabel || "Copy stream link");
+  copyStreamLinkButton.setAttribute("title", state.copyStreamLinkLabel || "Copy stream link");
   setProgress(positionMs, durationMs);
   if (showError) {
     skipPrompt.classList.remove("visible", "show-progress");

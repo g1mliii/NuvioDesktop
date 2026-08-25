@@ -36,6 +36,20 @@ class PlayerScreenRuntimeStateTest {
     }
 
     @Test
+    fun copyStreamLinkUsesPlayerNotificationChannel() {
+        val runtime = PlayerScreenRuntime(testPlayerScreenArgs())
+        var copiedValue = ""
+        runtime.copyToClipboard = { copiedValue = it }
+        runtime.streamLinkCopiedLabel = "Stream link copied"
+
+        runtime.copyActiveStreamLink()
+
+        assertEquals("https://example.com/video.mp4", copiedValue)
+        assertEquals("Stream link copied", runtime.playerNotificationMessage)
+        assertEquals(1L, runtime.playerNotificationToken)
+    }
+
+    @Test
     fun seekScrobbleUpdate_requiresActiveIncompletePlayback() {
         assertTrue(
             shouldUpdateTrackingScrobbleAfterSeek(

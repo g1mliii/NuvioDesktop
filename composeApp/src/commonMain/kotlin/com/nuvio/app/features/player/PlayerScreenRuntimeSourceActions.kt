@@ -9,6 +9,7 @@ import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.details.MetaVideo
 import com.nuvio.app.features.downloads.DownloadItem
 import com.nuvio.app.features.downloads.DownloadsRepository
+import com.nuvio.app.features.downloads.isSupportedDownloadUrl
 import com.nuvio.app.features.p2p.P2pSettingsRepository
 import com.nuvio.app.features.p2p.P2pStreamingEngine
 import com.nuvio.app.features.streams.StreamBehaviorHints
@@ -19,17 +20,6 @@ import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import com.nuvio.app.features.watchprogress.buildPlaybackVideoId
 import kotlinx.coroutines.launch
 
-internal fun String.isSupportedPlayerDownloadUrl(): Boolean {
-    val normalized = trim().lowercase()
-    if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) return false
-    return !normalized.endsWith(".m3u8") &&
-        !normalized.contains(".m3u8?") &&
-        !normalized.endsWith(".mpd") &&
-        !normalized.contains(".mpd?") &&
-        !normalized.endsWith(".torrent") &&
-        !normalized.contains(".torrent?")
-}
-
 internal fun PlayerScreenRuntime.activeShareableStreamUrl(): String? =
     activeSourceUrl
         .trim()
@@ -39,11 +29,11 @@ internal fun PlayerScreenRuntime.activeShareableStreamUrl(): String? =
 internal fun PlayerScreenRuntime.copyActiveStreamLink() {
     val url = activeShareableStreamUrl() ?: return
     copyToClipboard(url)
-    NuvioToastController.show(streamLinkCopiedLabel)
+    showPlayerNotification(streamLinkCopiedLabel)
 }
 
 internal fun PlayerScreenRuntime.downloadActiveStream() {
-    val url = activeShareableStreamUrl()?.takeIf { it.isSupportedPlayerDownloadUrl() } ?: return
+    val url = activeShareableStreamUrl()?.takeIf { it.isSupportedDownloadUrl() } ?: return
     val stream = StreamItem(
         name = activeStreamTitle,
         description = activeStreamSubtitle,
@@ -73,12 +63,17 @@ internal fun PlayerScreenRuntime.downloadActiveStream() {
         episodeThumbnail = activeEpisodeThumbnail,
         stream = stream,
     )
-    NuvioToastController.show(result.toastMessage())
+    showPlayerNotification(result.toastMessage())
 }
 
 internal fun PlayerScreenRuntime.canDownloadActiveStream(): Boolean =
     AppFeaturePolicy.downloadsEnabled &&
-        activeShareableStreamUrl()?.isSupportedPlayerDownloadUrl() == true
+        activeShareableStreamUrl()?.isSupportedDownloadUrl() == true
+
+private fun PlayerScreenRuntime.showPlayerNotification(message: String) {
+    playerNotificationMessage = message
+    playerNotificationToken += 1L
+}
 
 internal fun PlayerScreenRuntime.resolveDebridForPlayer(
     stream: StreamItem,

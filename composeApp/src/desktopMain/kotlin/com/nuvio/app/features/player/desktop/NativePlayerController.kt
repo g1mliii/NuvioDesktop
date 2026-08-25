@@ -1164,6 +1164,8 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         append(',')
         appendJsonField("playbackSpeedLabel", playbackSpeedLabel)
         append(',')
+        appendJsonField("playbackSpeedPanelTitle", playbackSpeedPanelTitle)
+        append(',')
         appendJsonField("isFullscreen", isFullscreen)
         append(',')
         appendJsonField("volumeLevel", volumeLevel)

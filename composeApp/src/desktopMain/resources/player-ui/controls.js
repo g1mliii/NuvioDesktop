@@ -72,6 +72,9 @@ const sourcesButton = document.getElementById("sourcesButton");
 const episodesButton = document.getElementById("episodesButton");
 const audioModal = document.getElementById("audioModal");
 const subtitleModal = document.getElementById("subtitleModal");
+const speedModal = document.getElementById("speedModal");
+const speedPanelTitle = document.getElementById("speedPanelTitle");
+const speedList = document.getElementById("speedList");
 const audioPanelTitle = document.getElementById("audioPanelTitle");
 const audioTrackList = document.getElementById("audioTrackList");
 const subtitleTrackList = document.getElementById("subtitleTrackList");
@@ -174,6 +177,7 @@ let state = {
   pauseOverlayDescription: "",
   resizeModeLabel: "Fit",
   playbackSpeedLabel: "1x",
+  playbackSpeedPanelTitle: "Playback speed",
   isFullscreen: false,
   volumeLevel: null,
   subtitlesLabel: "Subs",
@@ -844,6 +848,7 @@ const rangePositionMs = () => {
 
 const modalByName = {
   audio: audioModal,
+  speed: speedModal,
   subtitles: subtitleModal,
   sources: sourceModal,
   episodes: episodesModal,
@@ -988,6 +993,40 @@ const renderAudioTrackList = () => {
     row.appendChild(copy);
     row.appendChild(buildCheckIcon());
     audioTrackList.appendChild(row);
+  });
+};
+
+const playbackSpeedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+const formatPlaybackSpeed = speed => `${Number(speed).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}x`;
+
+const currentPlaybackSpeed = () => {
+  const parsed = Number.parseFloat(String(state.playbackSpeedLabel || "1"));
+  return Number.isFinite(parsed) ? parsed : 1;
+};
+
+const renderSpeedList = () => {
+  speedPanelTitle.textContent = state.playbackSpeedPanelTitle || "Playback speed";
+  speedList.textContent = "";
+  const selectedSpeed = currentPlaybackSpeed();
+  playbackSpeedOptions.forEach(speed => {
+    const selected = Math.abs(speed - selectedSpeed) < 0.001;
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = `track-row speed-track-row${selected ? " selected" : ""}`;
+    row.addEventListener("click", event => {
+      event.stopPropagation();
+      state.playbackSpeedLabel = formatPlaybackSpeed(speed);
+      send("setPlaybackSpeed", speed);
+      renderChrome();
+      window.setTimeout(closePlayerModal, 120);
+    });
+    const label = document.createElement("span");
+    label.className = "track-label speed-value";
+    label.textContent = formatPlaybackSpeed(speed);
+    row.appendChild(label);
+    if (selected) row.appendChild(buildCheckIcon());
+    speedList.appendChild(row);
   });
 };
 
@@ -1798,6 +1837,7 @@ const renderP2pConsentModal = () => {
 
 const renderActiveModal = () => {
   if (activeModal === "audio") renderAudioTrackList();
+  if (activeModal === "speed") renderSpeedList();
   if (activeModal === "subtitles") renderSubtitleModal();
   if (activeModal === "sources") renderSourceModal();
   if (activeModal === "episodes") renderEpisodesModal();
@@ -2466,6 +2506,10 @@ document.querySelectorAll("[data-command]").forEach(button => {
     }
     if (command === "audio") {
       openPlayerModal("audio");
+      return;
+    }
+    if (command === "speed") {
+      openPlayerModal("speed");
       return;
     }
     if (command === "subtitles") {

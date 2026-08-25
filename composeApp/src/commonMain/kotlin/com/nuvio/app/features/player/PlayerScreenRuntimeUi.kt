@@ -253,6 +253,7 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         pauseOverlayDescription = (activePauseDescription ?: activeStreamSubtitle).orEmpty(),
         resizeModeLabel = stringResource(resizeMode.labelRes),
         playbackSpeedLabel = formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed),
+        playbackSpeedPanelTitle = stringResource(Res.string.player_playback_speed),
         subtitlesLabel = stringResource(Res.string.compose_player_subs),
         audioLabel = stringResource(Res.string.compose_player_audio),
         sourcesLabel = stringResource(Res.string.compose_player_sources),
@@ -954,6 +955,11 @@ private fun PlayerScreenRuntime.handlePlayerControlsEvent(type: String, value: D
             selectedAudioIndex = index
             persistAudioPreference(audioTracks.firstOrNull { it.index == index })
             playerController?.selectAudioTrack(index)
+        }
+        "setPlaybackSpeed" -> {
+            val speed = value.toFloat().coerceIn(0.25f, 2f)
+            playerController?.setPlaybackSpeed(speed)
+            playbackSnapshot = playbackSnapshot.copy(playbackSpeed = speed)
         }
         "fetchAddonSubtitles" -> fetchAddonSubtitlesForActiveItem()
         "selectAddonSubtitle" -> {

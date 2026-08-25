@@ -9,7 +9,6 @@ import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.details.MetaVideo
 import com.nuvio.app.features.downloads.DownloadItem
 import com.nuvio.app.features.downloads.DownloadsRepository
-import com.nuvio.app.features.downloads.isSupportedDownloadUrl
 import com.nuvio.app.features.p2p.P2pSettingsRepository
 import com.nuvio.app.features.p2p.P2pStreamingEngine
 import com.nuvio.app.features.streams.StreamBehaviorHints
@@ -18,22 +17,30 @@ import com.nuvio.app.features.streams.StreamLinkCacheRepository
 import com.nuvio.app.features.streams.StreamProxyHeaders
 import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import com.nuvio.app.features.watchprogress.buildPlaybackVideoId
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-internal fun PlayerScreenRuntime.activeShareableStreamUrl(): String? =
-    activeSourceUrl
+internal fun PlayerScreenRuntime.activeShareableStreamUrl(): String? {
+    if (activeTorrentInfoHash != null) return null
+    return activeSourceUrl
         .trim()
-        .takeIf { activeTorrentInfoHash == null }
-        ?.takeIf { it.startsWith("http://", ignoreCase = true) || it.startsWith("https://", ignoreCase = true) }
+        .takeIf { it.startsWith("http://", ignoreCase = true) || it.startsWith("https://", ignoreCase = true) }
+}
+
+internal fun PlayerScreenRuntime.canDownloadActiveStream(): Boolean =
+    AppFeaturePolicy.downloadsEnabled &&
+        activeShareableStreamUrl()?.let { DownloadsRepository.isDownloadableUrl(it) } == true
 
 internal fun PlayerScreenRuntime.copyActiveStreamLink() {
-    val url = activeShareableStreamUrl() ?: return
+    val url = shareableStreamUrlOrNotify() ?: return
     copyToClipboard(url)
     showPlayerNotification(streamLinkCopiedLabel)
 }
 
 internal fun PlayerScreenRuntime.downloadActiveStream() {
-    val url = activeShareableStreamUrl()?.takeIf { it.isSupportedDownloadUrl() } ?: return
+    if (!AppFeaturePolicy.downloadsEnabled) return
+    val url = shareableStreamUrlOrNotify() ?: return
     val stream = StreamItem(
         name = activeStreamTitle,
         description = activeStreamSubtitle,
@@ -48,27 +55,33 @@ internal fun PlayerScreenRuntime.downloadActiveStream() {
             ),
         ),
     )
-    val result = DownloadsRepository.enqueueFromStream(
-        contentType = contentType ?: parentMetaType,
-        videoId = activeVideoId ?: parentMetaId,
-        parentMetaId = parentMetaId,
-        parentMetaType = parentMetaType,
-        title = title,
-        logo = logo,
-        poster = poster,
-        background = background,
-        seasonNumber = activeSeasonNumber,
-        episodeNumber = activeEpisodeNumber,
-        episodeTitle = activeEpisodeTitle,
-        episodeThumbnail = activeEpisodeThumbnail,
-        stream = stream,
-    )
-    showPlayerNotification(result.toastMessage())
+    scope.launch {
+        val message = withContext(Dispatchers.Default) {
+            DownloadsRepository.enqueueFromStream(
+                contentType = contentType ?: parentMetaType,
+                videoId = activeVideoId ?: parentMetaId,
+                parentMetaId = parentMetaId,
+                parentMetaType = parentMetaType,
+                title = title,
+                logo = logo,
+                poster = poster,
+                background = background,
+                seasonNumber = activeSeasonNumber,
+                episodeNumber = activeEpisodeNumber,
+                episodeTitle = activeEpisodeTitle,
+                episodeThumbnail = activeEpisodeThumbnail,
+                stream = stream,
+            ).toastMessage()
+        }
+        showPlayerNotification(message)
+    }
 }
 
-internal fun PlayerScreenRuntime.canDownloadActiveStream(): Boolean =
-    AppFeaturePolicy.downloadsEnabled &&
-        activeShareableStreamUrl()?.isSupportedDownloadUrl() == true
+private fun PlayerScreenRuntime.shareableStreamUrlOrNotify(): String? {
+    val url = activeShareableStreamUrl()
+    if (url == null) showPlayerNotification(noDirectStreamLinkLabel)
+    return url
+}
 
 private fun PlayerScreenRuntime.showPlayerNotification(message: String) {
     playerNotificationMessage = message

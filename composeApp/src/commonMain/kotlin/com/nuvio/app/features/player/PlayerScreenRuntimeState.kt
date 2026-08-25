@@ -127,6 +127,7 @@ internal class PlayerScreenRuntime(
     var resizeModeStretchLabel: String = ""
     var downloadedLabel: String = ""
     var streamLinkCopiedLabel: String = ""
+    var noDirectStreamLinkLabel: String = ""
     var copyToClipboard: (String) -> Unit = {}
     var airsPrefix: String = ""
     var tbaLabel: String = ""

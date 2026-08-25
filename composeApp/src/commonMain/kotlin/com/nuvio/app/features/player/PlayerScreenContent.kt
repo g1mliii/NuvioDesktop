@@ -45,6 +45,7 @@ import nuvio.composeapp.generated.resources.parental_severity_severe
 import nuvio.composeapp.generated.resources.parental_violence
 import nuvio.composeapp.generated.resources.compose_player_tba
 import nuvio.composeapp.generated.resources.streams_link_copied
+import nuvio.composeapp.generated.resources.streams_no_direct_link
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -135,6 +136,7 @@ internal fun PlayerScreenContent(args: PlayerScreenArgs) {
         runtime.resizeModeStretchLabel = stringResource(Res.string.compose_player_resize_stretch)
         runtime.downloadedLabel = stringResource(Res.string.compose_player_downloaded)
         runtime.streamLinkCopiedLabel = stringResource(Res.string.streams_link_copied)
+        runtime.noDirectStreamLinkLabel = stringResource(Res.string.streams_no_direct_link)
         runtime.copyToClipboard = { value -> clipboardManager.setText(AnnotatedString(value)) }
         runtime.airsPrefix = stringResource(Res.string.compose_player_airs_prefix)
         runtime.tbaLabel = stringResource(Res.string.compose_player_tba)

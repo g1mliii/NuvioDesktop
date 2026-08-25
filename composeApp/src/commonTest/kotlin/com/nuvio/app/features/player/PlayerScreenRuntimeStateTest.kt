@@ -50,6 +50,42 @@ class PlayerScreenRuntimeStateTest {
     }
 
     @Test
+    fun copyStreamLinkReportsWhenNoDirectLinkIsAvailable() {
+        val runtime = PlayerScreenRuntime(testPlayerScreenArgs())
+        var copied = false
+        runtime.copyToClipboard = { copied = true }
+        runtime.noDirectStreamLinkLabel = "No direct stream link available"
+        runtime.activeTorrentInfoHash = "0123456789abcdef"
+
+        runtime.copyActiveStreamLink()
+
+        assertFalse(copied)
+        assertEquals("No direct stream link available", runtime.playerNotificationMessage)
+        assertEquals(1L, runtime.playerNotificationToken)
+    }
+
+    @Test
+    fun streamActionsSkipTorrentAndLocalSources() {
+        val runtime = PlayerScreenRuntime(testPlayerScreenArgs())
+
+        assertEquals("https://example.com/video.mp4", runtime.activeShareableStreamUrl())
+        assertTrue(runtime.canDownloadActiveStream())
+
+        runtime.activeTorrentInfoHash = "0123456789abcdef"
+        assertNull(runtime.activeShareableStreamUrl())
+        assertFalse(runtime.canDownloadActiveStream())
+
+        runtime.activeTorrentInfoHash = null
+        runtime.activeSourceUrl = "file:/downloads/video.mkv"
+        assertNull(runtime.activeShareableStreamUrl())
+        assertFalse(runtime.canDownloadActiveStream())
+
+        runtime.activeSourceUrl = "https://example.com/master.m3u8"
+        assertEquals("https://example.com/master.m3u8", runtime.activeShareableStreamUrl())
+        assertFalse(runtime.canDownloadActiveStream())
+    }
+
+    @Test
     fun seekScrobbleUpdate_requiresActiveIncompletePlayback() {
         assertTrue(
             shouldUpdateTrackingScrobbleAfterSeek(

@@ -78,6 +78,8 @@ object DownloadsRepository {
         }
     }
 
+    fun isDownloadableUrl(url: String): Boolean = url.isSupportedDownloadUrl()
+
     fun playableLocalFileUri(item: DownloadItem): String? {
         ensureLoaded()
         if (item.status != DownloadStatus.Completed) return null
@@ -139,6 +141,7 @@ object DownloadsRepository {
         val currentItems = _uiState.value.items.toMutableList()
         val existing = currentItems.firstOrNull { it.logicalContentKey == logicalKey }
         if (existing != null) {
+            if (existing.hasPlayableLocalFile()) return DownloadEnqueueResult.AlreadyDownloaded
             replacedExisting = true
             activeHandles.remove(existing.id)?.cancel()
             DownloadsPlatformDownloader.removeFile(playableLocalFileUri(existing) ?: existing.localFileUri)
@@ -546,7 +549,7 @@ private fun String.fileExtensionFromUrl(): String {
     }
 }
 
-internal fun String.isSupportedDownloadUrl(): Boolean {
+private fun String.isSupportedDownloadUrl(): Boolean {
     val normalized = trim().lowercase()
     if (normalized.startsWith("magnet:")) return false
     if (normalized.endsWith(".m3u8") || normalized.contains(".m3u8?")) return false

@@ -95,6 +95,7 @@ internal class NativePlayerController(
     private var pendingSubtitleDelayMs: Int? = null
     private var pendingSubtitleStyle: SubtitleStyleState? = null
     private var pendingUseLibass: Boolean = false
+    @Volatile
     private var detectedHdr10PlusMetadata: Boolean = false
     private var lastSentControlsStructureKey: NativeControlsStructureKey? = null
     private var onAction: (PlayerControlsAction) -> Boolean = { false }
@@ -302,8 +303,8 @@ internal class NativePlayerController(
                 }.onSuccess { created ->
                     val accepted = synchronized(lifecycleLock) {
                         if (!releaseRequested && terminalReleaseFailure == null && pendingSource === pending) {
-                            handle = created
                             detectedHdr10PlusMetadata = false
+                            handle = created
                             true
                         } else {
                             false

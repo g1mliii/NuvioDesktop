@@ -175,7 +175,7 @@ let state = {
   pauseOverlayDescription: "",
   resizeModeLabel: "Fit",
   playbackSpeedLabel: "1x",
-  hdrBadgeLabel: "HDR",
+  hdrBadgeLabel: "",
   isFullscreen: false,
   volumeLevel: null,
   subtitlesLabel: "Subs",
